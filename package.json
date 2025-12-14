@@ -9,9 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "dist-exiftool": "^10.53.0",
+    "jszip": "^3.10.1",
     "next": "16.0.10",
+    "node-exiftool": "^2.3.0",
     "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react-dom": "19.2.1",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
