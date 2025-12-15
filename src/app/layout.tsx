@@ -15,8 +15,21 @@ const notoSansJp = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "Auto IPTC",
-  description: "Auto IPTC - Gemini と IPTC 書き込みを試すアップローダー",
+  title: {
+    default: "AUTO IPTC - AIで画像メタデータを自動生成 | IPTC自動書き込みツール",
+    template: "%s | AUTO IPTC",
+  },
+  description:
+    "画像のアップロードがめんどくさい？AUTO IPTCならAI（Gemini）が自動でタイトル・説明・タグを生成し、IPTCメタデータとして書き込み。ストックフォト投稿の効率化に。",
+  metadataBase: new URL("https://auto-iptc.vercel.app"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    siteName: "AUTO IPTC",
+    locale: "ja_JP",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
