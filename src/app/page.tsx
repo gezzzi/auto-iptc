@@ -139,6 +139,14 @@ export default function Home() {
     [uploads],
   );
 
+  const stepInfo = useMemo(() => {
+    const hasUploads = uploads.length > 0;
+    const hasMetadata = uploads.some((u) => u.metadataStatus === "success");
+    const hasIptcWritten = uploads.some((u) => u.iptcStatus === "success");
+    const currentStep = hasIptcWritten ? 3 : hasMetadata ? 2 : hasUploads ? 1 : 0;
+    return { hasUploads, hasMetadata, hasIptcWritten, currentStep };
+  }, [uploads]);
+
   const resetFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -535,6 +543,109 @@ export default function Home() {
           </div>
         </header>
 
+        {/* Horizontal Stepper */}
+        {(() => {
+          const { hasUploads, hasMetadata, hasIptcWritten, currentStep } = stepInfo;
+
+          const steps = [
+            { number: 1, label: "画像をアップロード", done: hasUploads },
+            { number: 2, label: "AIでメタデータ生成", done: hasMetadata },
+            { number: 3, label: "IPTC付きでDL", done: hasIptcWritten },
+          ];
+
+          return (
+            <div className="relative mb-16 flex items-center justify-center">
+              <div className="relative flex w-full max-w-3xl items-center justify-between">
+                {/* Background connector line */}
+                <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 border-4 border-black bg-[#F2F2F2]" />
+
+                {steps.map((step, index) => {
+                  const isActive = currentStep >= step.number - 1;
+                  const isDone = step.done;
+                  const isCurrent = currentStep === step.number - 1;
+
+                  return (
+                    <div
+                      key={step.number}
+                      className="relative z-10 flex flex-col items-center"
+                    >
+                      {/* Step circle */}
+                      <div
+                        className={`flex h-14 w-14 items-center justify-center border-4 border-black text-xl font-bold shadow-[4px_4px_0px_0px_#000] transition-all duration-300 ${
+                          isDone
+                            ? "bg-[#00E5FF] text-black"
+                            : isCurrent
+                              ? "scale-110 bg-[#FAFF00] text-black"
+                              : isActive
+                                ? "bg-white text-black"
+                                : "bg-[#E5E5E5] text-black/40"
+                        }`}
+                      >
+                        {isDone ? (
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={4}
+                            className="h-7 w-7"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        ) : (
+                          step.number
+                        )}
+                      </div>
+
+                      {/* Step label */}
+                      <div
+                        className={`mt-3 whitespace-nowrap border-2 border-black px-3 py-1 text-center text-[10px] font-bold uppercase tracking-[0.15em] shadow-[3px_3px_0px_0px_#000] transition-all duration-300 ${
+                          isDone
+                            ? "bg-[#00E5FF] text-black"
+                            : isCurrent
+                              ? "bg-[#FAFF00] text-black"
+                              : isActive
+                                ? "bg-white text-black"
+                                : "bg-[#E5E5E5] text-black/50"
+                        }`}
+                      >
+                        {step.label}
+                      </div>
+
+                      {/* Current step indicator */}
+                      {isCurrent && !isDone && (
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                          <div className="animate-bounce border-2 border-black bg-[#FF0080] px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white shadow-[2px_2px_0px_0px_#000]">
+                            NOW
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Progress line overlay */}
+                <div
+                  className="absolute left-0 top-1/2 h-2 -translate-y-1/2 border-y-4 border-l-4 border-black bg-[#FAFF00] transition-all duration-500"
+                  style={{
+                    width:
+                      currentStep === 0
+                        ? "0%"
+                        : currentStep === 1
+                          ? "33%"
+                          : currentStep === 2
+                            ? "66%"
+                            : "100%",
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })()}
+
         <section className="relative">
           <div className="relative z-10 transform border-4 border-black bg-white p-8 shadow-[12px_12px_0px_0px_#000] md:-rotate-1">
             <div className="grid gap-6 md:grid-cols-[2fr_1fr] md:items-start">
@@ -543,8 +654,17 @@ export default function Home() {
                   htmlFor="file-input"
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={handleDrop}
-                  className="relative flex min-h-44 cursor-pointer flex-col items-center justify-center border-4 border-dashed border-black bg-[#F2F2F2] px-6 py-6 text-center text-sm uppercase tracking-[0.2em] transition hover:-translate-y-1 hover:-translate-x-1 hover:bg-[#FAFF00]/70"
+                  className={`relative flex min-h-44 cursor-pointer flex-col items-center justify-center border-4 border-dashed border-black px-6 py-6 text-center text-sm uppercase tracking-[0.2em] transition hover:-translate-y-1 hover:-translate-x-1 ${
+                    stepInfo.currentStep === 0
+                      ? "bg-[#FAFF00]/40 hover:bg-[#FAFF00]/70"
+                      : "bg-[#F2F2F2] hover:bg-[#FAFF00]/70"
+                  }`}
                 >
+                  <div className={`absolute -left-3 -top-3 z-10 flex h-8 w-8 items-center justify-center border-4 border-black text-sm font-bold shadow-[2px_2px_0px_0px_#000] ${
+                    stepInfo.hasUploads ? "bg-[#00E5FF]" : "bg-[#FAFF00]"
+                  }`}>
+                    1
+                  </div>
                   <input
                     id="file-input"
                     ref={fileInputRef}
@@ -558,7 +678,7 @@ export default function Home() {
                     JPEG / PNG / WebP
                   </span>
                   <p className="mt-2 max-w-md text-base font-bold uppercase tracking-[0.2em]">
-                    ここにドロップ or クリックで選択
+                    ドロップ or クリックでアップロード
                   </p>
                   <p className="mt-1 text-[11px] uppercase tracking-[0.25em] text-black/60">
                     最大 {MAX_UPLOADS} 枚まで追加可能
@@ -600,26 +720,44 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="grid gap-3 rounded-lg border-4 border-black bg-[#F2F2F2] p-4 shadow-[6px_6px_0px_0px_#000]">
+              <div className="relative grid gap-3 rounded-lg border-4 border-black bg-[#F2F2F2] p-4 shadow-[6px_6px_0px_0px_#000]">
                 <p className="text-sm font-bold uppercase tracking-[0.2em]">
                   アクション
                 </p>
-                <button
-                  type="button"
-                  onClick={() => handleGenerateMetadata()}
-                  disabled={!uploads.length || isGenerating}
-                  className="flex items-center justify-center gap-2 border-4 border-black bg-[#FAFF00] px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] transition hover:-translate-y-1 hover:-translate-x-1 hover:bg-[#FAFF00] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isGenerating ? "Gemini 生成中…" : "AI でまとめてメタデータ生成"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleWriteAll}
-                  disabled={!uploads.length || isWritingAll}
-                  className="flex items-center justify-center gap-2 border-4 border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] transition hover:-translate-y-1 hover:-translate-x-1 hover:bg-[#00E5FF] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isWritingAll ? "ZIP 作成中…" : "全件 IPTC 付きでDL (ZIP)"}
-                </button>
+                <div className="relative">
+                  <div className={`absolute -left-3 -top-3 z-10 flex h-7 w-7 items-center justify-center border-4 border-black text-xs font-bold shadow-[2px_2px_0px_0px_#000] ${
+                    stepInfo.hasMetadata ? "bg-[#00E5FF]" : "bg-[#FAFF00]"
+                  }`}>
+                    2
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleGenerateMetadata()}
+                    disabled={!uploads.length || isGenerating}
+                    className={`w-full flex items-center justify-center gap-2 border-4 border-black px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] transition hover:-translate-y-1 hover:-translate-x-1 hover:bg-[#FAFF00] disabled:cursor-not-allowed disabled:opacity-50 ${
+                      stepInfo.currentStep === 1 ? "bg-[#FAFF00]/40" : "bg-white"
+                    }`}
+                  >
+                    {isGenerating ? "Gemini 生成中…" : "AI でまとめてメタデータ生成"}
+                  </button>
+                </div>
+                <div className="relative">
+                  <div className={`absolute -left-3 -top-3 z-10 flex h-7 w-7 items-center justify-center border-4 border-black text-xs font-bold shadow-[2px_2px_0px_0px_#000] ${
+                    stepInfo.hasIptcWritten ? "bg-[#00E5FF]" : "bg-[#FAFF00]"
+                  }`}>
+                    3
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleWriteAll}
+                    disabled={!uploads.length || isWritingAll}
+                    className={`w-full flex items-center justify-center gap-2 border-4 border-black px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] transition hover:-translate-y-1 hover:-translate-x-1 hover:bg-[#FAFF00] disabled:cursor-not-allowed disabled:opacity-50 ${
+                      stepInfo.currentStep === 2 ? "bg-[#FAFF00]/40" : "bg-white"
+                    }`}
+                  >
+                    {isWritingAll ? "ZIP 作成中…" : "全件 IPTC 付きでDL (ZIP)"}
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={clearUploads}
