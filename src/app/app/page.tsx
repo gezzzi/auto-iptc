@@ -58,7 +58,8 @@ type UploadedFileInfo = {
 
 const MAX_UPLOADS = 40;
 const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB (Vercel制限)
-const UPLOAD_CONCURRENCY = 4; // 同時アップロード数
+const UPLOAD_CONCURRENCY = 10; // Geminiアップロード同時実行数
+const IPTC_CONCURRENCY = 5; // IPTC書き込み同時実行数
 const SUPPORTED_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -625,31 +626,75 @@ export default function Home() {
 
     setIsWritingAll(true);
     setErrorMessage(null);
+    setMetadataMessage(null);
 
     try {
       const zip = new JSZip();
-      let successCount = 0;
+      const results: { filename: string; blob: Blob }[] = [];
+      let completedCount = 0;
 
-      for (const upload of uploads) {
-        const result = await writeIptc(upload, { skipDownload: true });
-        if (result.success) {
-          zip.file(result.filename, result.blob);
-          successCount += 1;
+      // 並列処理用のキュー
+      const queue = [...uploads];
+      
+      const worker = async () => {
+        while (queue.length > 0) {
+          const upload = queue.shift();
+          if (!upload) break;
+
+          const result = await writeIptc(upload, { skipDownload: true });
+          if (result.success) {
+            results.push({ filename: result.filename, blob: result.blob });
+          }
+
+          completedCount++;
+          setMetadataMessage({
+            type: "success",
+            text: `IPTC書き込み中... (${completedCount}/${uploads.length})`,
+          });
         }
-      }
+      };
 
-      if (successCount === 0) {
+      // 並列でワーカーを実行
+      await Promise.all(
+        Array.from({ length: Math.min(IPTC_CONCURRENCY, uploads.length) }, worker)
+      );
+
+      if (results.length === 0) {
         setErrorMessage("ZIP の作成に失敗しました。");
+        setMetadataMessage({ type: "error", text: "ZIP の作成に失敗しました。" });
         return;
       }
 
-      const content = await zip.generateAsync({ type: "blob" });
+      setMetadataMessage({
+        type: "success",
+        text: "ZIPファイルを生成中...",
+      });
+
+      // ZIPにファイルを追加
+      for (const { filename, blob } of results) {
+        zip.file(filename, blob);
+      }
+
+      const content = await zip.generateAsync({ 
+        type: "blob",
+        compression: "STORE",  // 圧縮なし（画像は既に圧縮済みのため高速化）
+      });
       downloadBlob(content, `iptc_download_${formatTimestampForFile(Date.now())}.zip`);
 
-      if (successCount < uploads.length) {
+      if (results.length < uploads.length) {
+        const failedCount = uploads.length - results.length;
         setErrorMessage(
-          `${uploads.length - successCount} 件で IPTC 書き込みに失敗しました。成功分のみ ZIP に含まれています。`,
+          `${failedCount} 件で IPTC 書き込みに失敗しました。成功分のみ ZIP に含まれています。`,
         );
+        setMetadataMessage({
+          type: "error",
+          text: `${results.length} 件成功、${failedCount} 件失敗。ZIPをダウンロードしました。`,
+        });
+      } else {
+        setMetadataMessage({
+          type: "success",
+          text: `${results.length} 件のIPTC付き画像をZIPでダウンロードしました。`,
+        });
       }
     } finally {
       setIsWritingAll(false);
