@@ -142,6 +142,28 @@ const SparklesIcon = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const UploadIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="17 8 12 3 7 8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+);
+
+const DownloadIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);
+
+const PlayIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
+    <path d="M8 5v14l11-7z" />
+  </svg>
+);
+
 export default function Home() {
   const [uploads, setUploads] = useState<UploadedImage[]>([]);
   const [language, setLanguage] = useState<MetadataLanguage>("ja");
@@ -701,6 +723,20 @@ export default function Home() {
     }
   }, [uploads, writeIptc]);
 
+  // 2番（メタデータ生成）→ 3番（IPTC書き込み＆ZIP DL）を自動実行
+  const handleAutoProcess = useCallback(async () => {
+    if (!uploads.length) {
+      setErrorMessage("まず画像をアップロードしてください。");
+      return;
+    }
+
+    // ステップ2: メタデータ生成
+    await handleGenerateMetadata();
+
+    // ステップ3: IPTC書き込み＆ZIP DL
+    await handleWriteAll();
+  }, [uploads.length, handleGenerateMetadata, handleWriteAll]);
+
   return (
     <main className="relative min-h-screen bg-[#FFDEE9] pb-24 font-[var(--font-space-mono)] text-black">
       <div
@@ -859,6 +895,7 @@ export default function Home() {
                   <span className="text-xs font-bold uppercase tracking-[0.3em] text-black">
                     JPEG / PNG / WebP
                   </span>
+                  <UploadIcon className="mt-2 h-10 w-10 text-black/70" />
                   <p className="mt-2 max-w-md text-base font-bold uppercase tracking-[0.2em]">
                     ドロップ or クリックでアップロード
                   </p>
@@ -920,7 +957,8 @@ export default function Home() {
                       stepInfo.currentStep === 1 ? "bg-[#FAFF00]/40" : "bg-white"
                     }`}
                   >
-                    {isGenerating ? "Gemini 生成中…" : "AI でまとめてメタデータ生成"}
+                    <SparklesIcon className="h-5 w-5" />
+                    {isGenerating ? "Gemini 生成中…" : "AI でメタデータ生成"}
                   </button>
                 </div>
                 <div className="relative">
@@ -937,15 +975,18 @@ export default function Home() {
                       stepInfo.currentStep === 2 ? "bg-[#FAFF00]/40" : "bg-white"
                     }`}
                   >
-                    {isWritingAll ? "ZIP 作成中…" : "全件 IPTC 付きでDL (ZIP)"}
+                    <DownloadIcon className="h-5 w-5" />
+                    {isWritingAll ? "ZIP 作成中…" : "IPTC 付きでDL (ZIP)"}
                   </button>
                 </div>
                 <button
                   type="button"
-                  onClick={clearUploads}
-                  className="flex items-center justify-center gap-2 border-4 border-black bg-black px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:-translate-y-1 hover:-translate-x-1 hover:bg-[#FAFF00] hover:text-black"
+                  onClick={handleAutoProcess}
+                  disabled={!uploads.length || isGenerating || isWritingAll}
+                  className="flex items-center justify-center gap-2 border-4 border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:-translate-y-1 hover:-translate-x-1 hover:bg-[#FAFF00] hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  アップロードをクリア
+                  <PlayIcon className="h-5 w-5" />
+                  {isGenerating || isWritingAll ? "処理中…" : "自動アクション（2→3）"}
                 </button>
                 <p className="text-[11px] uppercase tracking-[0.25em] text-black/70">
                   <span className="block">おすすめの使い方：</span>
