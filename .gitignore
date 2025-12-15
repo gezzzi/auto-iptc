@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 refs/
+
+# cloud-run
+cloud-run/node_modules
+cloud-run/dist
+cloud-run/.env
+cloud-run/.env.local
