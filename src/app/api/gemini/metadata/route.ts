@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FileState, GoogleAIFileManager } from "@google/generative-ai/server";
+import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { GoogleGenerativeAI, type Part } from "@google/generative-ai";
 
 type MetadataLanguage = "en" | "ja";
@@ -7,21 +7,6 @@ type MetadataLanguage = "en" | "ja";
 const MODEL_NAME = "gemini-2.5-flash";
 const MAX_FILES = 40;
 const MAX_TAGS = 12;
-const UPLOAD_CONCURRENCY = 12;
-
-const SUPPORTED_MIME_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/x-webp",
-]);
-
-const EXTENSION_MIME_MAP: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  webp: "image/webp",
-};
 
 const SYSTEM_PROMPTS: Record<MetadataLanguage, string> = {
   en: `You are a photo metadata assistant. For each image return:
@@ -56,66 +41,6 @@ const PROMPT_INTRO = {
 };
 
 export const runtime = "nodejs";
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const resolveMimeType = (file: File): string => {
-  const type = (file.type || "").toLowerCase();
-  if (SUPPORTED_MIME_TYPES.has(type)) {
-    return type;
-  }
-
-  const name = file.name || "";
-  const dotIndex = name.lastIndexOf(".");
-  if (dotIndex !== -1 && dotIndex < name.length - 1) {
-    const ext = name.slice(dotIndex + 1).toLowerCase();
-    if (ext in EXTENSION_MIME_MAP) {
-      return EXTENSION_MIME_MAP[ext]!;
-    }
-  }
-
-  return "application/octet-stream";
-};
-
-const isSupportedFile = (file: File) => {
-  const type = (file.type || "").toLowerCase();
-  if (SUPPORTED_MIME_TYPES.has(type)) {
-    return true;
-  }
-  const name = file.name || "";
-  const dotIndex = name.lastIndexOf(".");
-  if (dotIndex === -1 || dotIndex === name.length - 1) {
-    return false;
-  }
-  const ext = name.slice(dotIndex + 1).toLowerCase();
-  return ext in EXTENSION_MIME_MAP;
-};
-
-const waitForFileActivation = async (
-  fileManager: GoogleAIFileManager,
-  fileName: string,
-  initialState: FileState,
-) => {
-  if (initialState === FileState.ACTIVE) {
-    return fileManager.getFile(fileName);
-  }
-
-  const timeoutMs = 20000;
-  const startedAt = Date.now();
-  // Poll until Gemini finishes processing the uploaded file.
-  while (Date.now() - startedAt < timeoutMs) {
-    await delay(800);
-    const fileMetadata = await fileManager.getFile(fileName);
-    if (fileMetadata.state === FileState.ACTIVE) {
-      return fileMetadata;
-    }
-    if (fileMetadata.state === FileState.FAILED) {
-      throw new Error("Gemini によるファイル処理に失敗しました。");
-    }
-  }
-
-  throw new Error("Gemini がファイルを処理するまでにタイムアウトしました。");
-};
 
 type GeminiResult = { id: string; title: string; description?: string; tags: string[] };
 
@@ -168,39 +93,22 @@ const sanitizeResults = (raw: unknown): GeminiResult[] => {
   return sanitized;
 };
 
-const getMetadataLanguage = (value: FormDataEntryValue | null): MetadataLanguage => {
-  if (typeof value === "string") {
-    const normalized = value.toLowerCase();
-    if (normalized === "ja") return "ja";
-  }
-  return "en";
-};
-
 const buildPromptIntro = (language: MetadataLanguage, count: number) => {
   const templates = PROMPT_INTRO[language];
   return count === 1 ? templates.single : templates.multi(count);
 };
 
-const runWithConcurrency = async <T, R>(
-  items: T[],
-  limit: number,
-  worker: (item: T, index: number) => Promise<R>,
-): Promise<R[]> => {
-  const results: R[] = new Array(items.length);
-  let cursor = 0;
-
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (cursor < items.length) {
-      const current = cursor;
-      cursor += 1;
-      results[current] = await worker(items[current]!, current);
-    }
-  });
-
-  await Promise.all(runners);
-  return results;
+type UploadedFile = {
+  id: string;
+  name: string;
+  fileUri: string;
+  mimeType: string;
+  geminiFileName: string;
 };
 
+/**
+ * アップロード済みファイルのURIを受け取り、メタデータを生成する
+ */
 export async function POST(request: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -211,65 +119,55 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const formData = await request.formData();
-  const language = getMetadataLanguage(formData.get("language"));
-  const files = formData
-    .getAll("files")
-    .filter((item): item is File => item instanceof File);
-
-  if (files.length === 0) {
+  let body: { files?: unknown; language?: unknown };
+  
+  try {
+    body = await request.json();
+  } catch {
     return NextResponse.json(
-      { error: "画像ファイルを選択してください。" },
+      { error: "リクエストボディが不正です。" },
       { status: 400 },
     );
   }
 
-  if (files.length > MAX_FILES) {
+  const language = typeof body.language === "string" && body.language.toLowerCase() === "ja" ? "ja" : "en";
+
+  if (!Array.isArray(body.files) || body.files.length === 0) {
     return NextResponse.json(
-      { error: `一度に送信できる画像は最大 ${MAX_FILES} 枚です。` },
+      { error: "ファイル情報が必要です。" },
       { status: 400 },
     );
   }
 
-  const metaRaw = formData.get("meta");
-  let metaList: { id: string; name?: string }[] = [];
-
-  if (typeof metaRaw === "string" && metaRaw.trim().length > 0) {
-    try {
-      const parsed: unknown = JSON.parse(metaRaw);
-      if (Array.isArray(parsed)) {
-        metaList = parsed
-          .map((item) => (typeof item === "object" && item !== null ? item : null))
-          .filter((item): item is { id: string; name?: string } =>
-            typeof item?.id === "string",
-          )
-          .map((item) => ({
-            id: item.id,
-            name: typeof item.name === "string" ? item.name : undefined,
-          }));
-      }
-    } catch (error) {
-      console.warn("Failed to parse meta payload", error);
-    }
+  if (body.files.length > MAX_FILES) {
+    return NextResponse.json(
+      { error: `一度に処理できる画像は最大 ${MAX_FILES} 枚です。` },
+      { status: 400 },
+    );
   }
 
-  const fileEntries = files.map((file, index) => {
-    const fallbackId = `file-${index + 1}`;
-    const meta = metaList[index];
-    return {
-      clientId: typeof meta?.id === "string" ? meta.id : fallbackId,
-      originalName: typeof meta?.name === "string" ? meta.name : file.name || fallbackId,
-      file,
-    };
-  });
-
-  for (const entry of fileEntries) {
-    if (!isSupportedFile(entry.file)) {
+  // Validate file entries
+  const files: UploadedFile[] = [];
+  for (const entry of body.files) {
+    if (
+      typeof entry !== "object" ||
+      entry === null ||
+      typeof entry.id !== "string" ||
+      typeof entry.fileUri !== "string" ||
+      typeof entry.mimeType !== "string"
+    ) {
       return NextResponse.json(
-        { error: "JPEG / PNG / WebP 形式のみ対応しています。" },
+        { error: "不正なファイル情報が含まれています。" },
         { status: 400 },
       );
     }
+    files.push({
+      id: entry.id,
+      name: typeof entry.name === "string" ? entry.name : entry.id,
+      fileUri: entry.fileUri,
+      mimeType: entry.mimeType,
+      geminiFileName: typeof entry.geminiFileName === "string" ? entry.geminiFileName : "",
+    });
   }
 
   const fileManager = new GoogleAIFileManager(apiKey);
@@ -279,35 +177,13 @@ export async function POST(request: NextRequest) {
     systemInstruction: SYSTEM_PROMPTS[language],
   });
 
-  const uploadedFileIds: string[] = [];
+  // Collect Gemini file names for cleanup
+  const geminiFileNames = files
+    .map((f) => f.geminiFileName)
+    .filter((name) => name.length > 0);
 
   try {
-    const preparedFiles = await runWithConcurrency(
-      fileEntries,
-      Math.min(UPLOAD_CONCURRENCY, fileEntries.length),
-      async (entry) => {
-        const buffer = Buffer.from(await entry.file.arrayBuffer());
-        const uploadResponse = await fileManager.uploadFile(buffer, {
-          displayName: entry.originalName,
-          mimeType: resolveMimeType(entry.file),
-        });
-
-        uploadedFileIds.push(uploadResponse.file.name);
-        const readyFile = await waitForFileActivation(
-          fileManager,
-          uploadResponse.file.name,
-          uploadResponse.file.state,
-        );
-
-        return {
-          clientId: entry.clientId,
-          originalName: entry.originalName,
-          fileMetadata: readyFile,
-        };
-      },
-    );
-
-    const promptIntro = buildPromptIntro(language, preparedFiles.length);
+    const promptIntro = buildPromptIntro(language, files.length);
 
     const parts: Part[] = [
       {
@@ -315,12 +191,12 @@ export async function POST(request: NextRequest) {
       },
     ];
 
-    for (const prepared of preparedFiles) {
-      parts.push({ text: `画像ID: ${prepared.clientId} / ファイル: ${prepared.originalName}` });
+    for (const file of files) {
+      parts.push({ text: `画像ID: ${file.id} / ファイル: ${file.name}` });
       parts.push({
         fileData: {
-          mimeType: prepared.fileMetadata.mimeType,
-          fileUri: prepared.fileMetadata.uri,
+          mimeType: file.mimeType,
+          fileUri: file.fileUri,
         },
       });
     }
@@ -359,8 +235,9 @@ export async function POST(request: NextRequest) {
         : "Gemini でのメタデータ生成中にエラーが発生しました。";
     return NextResponse.json({ error: message }, { status: 500 });
   } finally {
+    // Clean up uploaded files from Gemini
     await Promise.all(
-      uploadedFileIds.map((fileId) =>
+      geminiFileNames.map((fileId) =>
         fileManager.deleteFile(fileId).catch(() => undefined),
       ),
     );

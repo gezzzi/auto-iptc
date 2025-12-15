@@ -39,7 +39,25 @@ type MetadataResponse = {
   error?: string;
 };
 
+type GeminiUploadResponse = {
+  id?: string;
+  name?: string;
+  fileUri?: string;
+  mimeType?: string;
+  geminiFileName?: string;
+  error?: string;
+};
+
+type UploadedFileInfo = {
+  id: string;
+  name: string;
+  fileUri: string;
+  mimeType: string;
+  geminiFileName: string;
+};
+
 const MAX_UPLOADS = 40;
+const UPLOAD_CONCURRENCY = 4; // 同時アップロード数
 const SUPPORTED_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -283,39 +301,132 @@ export default function Home() {
         ),
       );
 
-      try {
-        const formData = new FormData();
-        formData.append(
-          "meta",
-          JSON.stringify(
-            targetList.map((item) => ({
-              id: item.id,
-              name: item.name,
-            })),
-          ),
-        );
-        formData.append("language", language);
-        targetList.forEach((item) => formData.append("files", item.file, item.name));
+      const uploadedFiles: UploadedFileInfo[] = [];
+      const failedIds = new Set<string>();
 
-        const response = await fetch("/api/gemini/metadata", {
-          method: "POST",
-          body: formData,
+      try {
+        // ステップ1: 画像を1枚ずつGemini File APIにアップロード
+        setMetadataMessage({
+          type: "success",
+          text: `Geminiにアップロード中... (0/${targetList.length})`,
         });
 
-        const body = (await response.json()) as MetadataResponse;
-        if (!response.ok) {
-          throw new Error(body.error ?? "メタデータ生成に失敗しました。");
+        // 同時アップロード数を制限して並列処理
+        const uploadQueue = [...targetList];
+        let uploadedCount = 0;
+
+        const uploadWorker = async () => {
+          while (uploadQueue.length > 0) {
+            const item = uploadQueue.shift();
+            if (!item) break;
+
+            try {
+              const formData = new FormData();
+              formData.append("file", item.file);
+              formData.append("id", item.id);
+              formData.append("name", item.name);
+
+              const response = await fetch("/api/gemini/upload", {
+                method: "POST",
+                body: formData,
+              });
+
+              if (!response.ok) {
+                const contentType = response.headers.get("content-type") || "";
+                let errorMsg = "アップロードに失敗しました。";
+                if (contentType.includes("application/json")) {
+                  try {
+                    const body = (await response.json()) as GeminiUploadResponse;
+                    errorMsg = body.error ?? errorMsg;
+                  } catch {
+                    // ignore
+                  }
+                }
+                console.error(`Failed to upload ${item.name}:`, errorMsg);
+                failedIds.add(item.id);
+              } else {
+                const body = (await response.json()) as GeminiUploadResponse;
+                if (body.fileUri && body.mimeType) {
+                  uploadedFiles.push({
+                    id: body.id ?? item.id,
+                    name: body.name ?? item.name,
+                    fileUri: body.fileUri,
+                    mimeType: body.mimeType,
+                    geminiFileName: body.geminiFileName ?? "",
+                  });
+                } else {
+                  failedIds.add(item.id);
+                }
+              }
+            } catch (error) {
+              console.error(`Error uploading ${item.name}:`, error);
+              failedIds.add(item.id);
+            }
+
+            uploadedCount++;
+            setMetadataMessage({
+              type: "success",
+              text: `Geminiにアップロード中... (${uploadedCount}/${targetList.length})`,
+            });
+          }
+        };
+
+        // 並列でアップロード
+        await Promise.all(
+          Array.from({ length: Math.min(UPLOAD_CONCURRENCY, targetList.length) }, uploadWorker)
+        );
+
+        if (uploadedFiles.length === 0) {
+          throw new Error("すべての画像のアップロードに失敗しました。");
         }
 
+        // ステップ2: アップロード済みファイルでメタデータ生成（1回のリクエスト）
+        setMetadataMessage({
+          type: "success",
+          text: `メタデータを生成中... (${uploadedFiles.length}枚)`,
+        });
+
+        const generateResponse = await fetch("/api/gemini/metadata", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            files: uploadedFiles,
+            language,
+          }),
+        });
+
+        const contentType = generateResponse.headers.get("content-type") || "";
+
+        if (!generateResponse.ok) {
+          let errorMessage = "メタデータ生成に失敗しました。";
+
+          if (contentType.includes("application/json")) {
+            try {
+              const body = (await generateResponse.json()) as MetadataResponse;
+              errorMessage = body.error ?? errorMessage;
+            } catch {
+              // JSONパース失敗
+            }
+          } else {
+            errorMessage = `サーバーエラー (HTTP ${generateResponse.status})`;
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        const body = (await generateResponse.json()) as MetadataResponse;
         const results = body.results ?? [];
-        const resultMap = new Map<
+
+        const allResults = new Map<
           string,
           { title?: string; description?: string; tags?: string[] | string }
         >();
 
         results.forEach((item) => {
           if (item?.id) {
-            resultMap.set(item.id, {
+            allResults.set(item.id, {
               title: item.title,
               description: item.description,
               tags: item.tags,
@@ -324,12 +435,19 @@ export default function Home() {
         });
 
         const missing = new Set(targetIds);
-        resultMap.forEach((_value, key) => missing.delete(key));
+        allResults.forEach((_value, key) => missing.delete(key));
+        // アップロード失敗分も missing に追加
+        failedIds.forEach((id) => missing.add(id));
 
         setUploads((prev) =>
           prev.map((item) => {
             if (!targetIds.has(item.id)) return item;
-            const match = resultMap.get(item.id);
+            
+            if (failedIds.has(item.id)) {
+              return { ...item, metadataStatus: "error" as Status };
+            }
+
+            const match = allResults.get(item.id);
             if (!match) {
               return { ...item, metadataStatus: "error" as Status };
             }
@@ -356,12 +474,12 @@ export default function Home() {
         if (missing.size > 0) {
           setMetadataMessage({
             type: "error",
-            text: `${missing.size} 件の画像でメタデータを取得できませんでした。`,
+            text: `${allResults.size} 件成功、${missing.size} 件失敗しました。`,
           });
         } else {
           setMetadataMessage({
             type: "success",
-            text: `${resultMap.size} 件のメタデータを反映しました。`,
+            text: `${allResults.size} 件のメタデータを反映しました。`,
           });
         }
       } catch (error) {
