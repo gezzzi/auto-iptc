@@ -57,6 +57,7 @@ type UploadedFileInfo = {
 };
 
 const MAX_UPLOADS = 40;
+const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB (Vercel制限)
 const UPLOAD_CONCURRENCY = 4; // 同時アップロード数
 const SUPPORTED_TYPES = new Set([
   "image/jpeg",
@@ -180,7 +181,8 @@ export default function Home() {
       const availableSlots = Math.max(0, MAX_UPLOADS - uploads.length);
 
       const accepted: UploadedImage[] = [];
-      const rejected: string[] = [];
+      const rejectedFormat: string[] = [];
+      const rejectedSize: string[] = [];
 
       for (const file of files.slice(0, availableSlots)) {
         const type = (file.type || "").toLowerCase();
@@ -189,7 +191,13 @@ export default function Home() {
         const isSupported =
           SUPPORTED_TYPES.has(type) || /\.(?:jpe?g|png|webp)$/i.test(name);
         if (!isSupported) {
-          rejected.push(name);
+          rejectedFormat.push(name);
+          continue;
+        }
+
+        // ファイルサイズチェック (4.5MB制限)
+        if (file.size > MAX_FILE_SIZE) {
+          rejectedSize.push(`${name} (${formatBytes(file.size)})`);
           continue;
         }
 
@@ -216,10 +224,21 @@ export default function Home() {
         setUploads((prev) => [...accepted, ...prev].slice(0, MAX_UPLOADS));
       }
 
-      if (rejected.length > 0) {
-        setErrorMessage(
-          `非対応の形式をスキップしました（JPEG / PNG / WebP のみ）。 ${rejected.join(", ")}`,
+      // エラーメッセージの構築
+      const errorMessages: string[] = [];
+      if (rejectedFormat.length > 0) {
+        errorMessages.push(
+          `非対応の形式: ${rejectedFormat.join(", ")}（JPEG / PNG / WebP のみ）`
         );
+      }
+      if (rejectedSize.length > 0) {
+        errorMessages.push(
+          `サイズ超過（4.5MB以下）: ${rejectedSize.join(", ")}`
+        );
+      }
+
+      if (errorMessages.length > 0) {
+        setErrorMessage(errorMessages.join(" / "));
       } else if (accepted.length === 0) {
         setErrorMessage("追加できるファイルがありません。");
       }
@@ -799,7 +818,7 @@ export default function Home() {
                     ドロップ or クリックでアップロード
                   </p>
                   <p className="mt-1 text-[11px] uppercase tracking-[0.25em] text-black/60">
-                    最大 {MAX_UPLOADS} 枚まで追加可能
+                    最大 {MAX_UPLOADS} 枚 / 1枚あたり 4.5MB まで
                   </p>
                 </label>
                 <div className="flex flex-wrap items-center gap-3">
