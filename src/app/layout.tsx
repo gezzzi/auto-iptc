@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   description:
     "画像のアップロードがめんどくさい？AUTO IPTCならAI（Gemini）が自動でタイトル・説明・タグを生成し、IPTCメタデータとして書き込み。ストックフォト投稿の効率化に。",
-  metadataBase: new URL("https://auto-iptc.vercel.app"),
+  metadataBase: new URL("https://www.autoiptc.com"),
   alternates: {
     canonical: "/",
   },
