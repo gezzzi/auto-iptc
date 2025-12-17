@@ -168,6 +168,7 @@ export default function Home() {
   const [uploads, setUploads] = useState<UploadedImage[]>([]);
   const [language, setLanguage] = useState<MetadataLanguage>("ja");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const [metadataMessage, setMetadataMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -765,6 +766,16 @@ export default function Home() {
             <p className="max-w-3xl text-sm uppercase tracking-[0.3em] text-slate-100">
               アップロード画像に対して Gemini でタイトル・説明・タグを生成し、IPTC として書き込みできます
             </p>
+            <button
+              type="button"
+              onClick={() => setShowVideoModal(true)}
+              className="mt-4 inline-flex w-fit items-center gap-2 border-4 border-black bg-[#FAFF00] px-5 py-3 text-base font-bold uppercase tracking-wider text-black shadow-[4px_4px_0px_0px_#000] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000]"
+            >
+              <svg className="h-6 w-6 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              使い方を見る
+            </button>
           </div>
           <div className="absolute right-4 -top-6 flex h-16 w-16 items-center justify-center rounded-full border-4 border-black bg-[#FAFF00] text-black shadow-[4px_4px_0px_0px_#000]">
             <ZapIcon className="h-8 w-8" />
@@ -1153,6 +1164,42 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Video Coming Soon Modal */}
+      {showVideoModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowVideoModal(false)}
+        >
+          <div
+            className="w-full max-w-md border-4 border-black bg-white p-8 shadow-[8px_8px_0px_0px_#000]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-6 flex justify-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-black bg-[#FAFF00]">
+                <svg className="h-10 w-10 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </div>
+            </div>
+            <h3 className="mb-4 text-center text-2xl font-bold uppercase tracking-tight">
+              Coming Soon!
+            </h3>
+            <p className="mb-6 text-center text-sm uppercase tracking-wider text-black/70">
+              使い方動画は現在準備中です。
+              <br />
+              もうしばらくお待ちください。
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowVideoModal(false)}
+              className="w-full border-4 border-black bg-[#FF0080] py-3 text-base font-bold uppercase tracking-wider text-white shadow-[4px_4px_0px_0px_#000] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000]"
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
