@@ -766,7 +766,7 @@ export default function Home() {
               アップロード画像に対して Gemini でタイトル・説明・タグを生成し、IPTC として書き込みできます
             </p>
           </div>
-          <div className="absolute -right-6 -top-6 flex h-16 w-16 items-center justify-center rounded-full border-4 border-black bg-[#FAFF00] text-black shadow-[4px_4px_0px_0px_#000]">
+          <div className="absolute right-4 -top-6 flex h-16 w-16 items-center justify-center rounded-full border-4 border-black bg-[#FAFF00] text-black shadow-[4px_4px_0px_0px_#000]">
             <ZapIcon className="h-8 w-8" />
           </div>
         </header>
