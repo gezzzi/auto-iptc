@@ -16,17 +16,17 @@ const notoSansJp = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: {
-    default: "AUTO IPTC - AIで画像メタデータを自動生成 | IPTC自動書き込みツール",
-    template: "%s | AUTO IPTC",
+    default: "AutoIPTC - AIで画像メタデータを自動生成 | IPTC自動書き込みツール",
+    template: "%s | AutoIPTC",
   },
   description:
-    "画像のアップロードがめんどくさい？AUTO IPTCならAI（Gemini）が自動でタイトル・説明・タグを生成し、IPTCメタデータとして書き込み。ストックフォト投稿の効率化に。",
+    "画像のアップロードがめんどくさい？AutoIPTCならAI（Gemini）が自動でタイトル・説明・タグを生成し、IPTCメタデータとして書き込み。ストックフォト投稿の効率化に。",
   metadataBase: new URL("https://www.autoiptc.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    siteName: "AUTO IPTC",
+    siteName: "AutoIPTC",
     locale: "ja_JP",
     type: "website",
   },

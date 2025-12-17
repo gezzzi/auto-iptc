@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "AUTO IPTC - AIで画像メタデータを自動生成 | IPTC自動書き込みツール",
+  title: "AutoIPTC - AIで画像メタデータを自動生成 | IPTC自動書き込みツール",
   description:
-    "画像のアップロードがめんどくさい？AUTO IPTCならAI（Gemini）が自動でタイトル・説明・タグを生成し、IPTCメタデータとして書き込み。ストックフォト投稿の効率化に。無料で使えるWebツール。",
+    "画像のアップロードがめんどくさい？AutoIPTCならAI（Gemini）が自動でタイトル・説明・タグを生成し、IPTCメタデータとして書き込み。ストックフォト投稿の効率化に。無料で使えるWebツール。",
   keywords: [
     "IPTC 自動",
     "画像 メタデータ 自動生成",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "写真 説明文 AI",
   ],
   openGraph: {
-    title: "AUTO IPTC - AIで画像メタデータを自動生成",
+    title: "AutoIPTC - AIで画像メタデータを自動生成",
     description:
       "画像のアップロード作業がめんどくさい方へ。AIが自動でタイトル・説明・タグを生成し、IPTCとして書き込み。",
     type: "website",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AUTO IPTC - AIで画像メタデータを自動生成",
+    title: "AutoIPTC - AIで画像メタデータを自動生成",
     description:
       "画像のアップロード作業がめんどくさい方へ。AIが自動でタイトル・説明・タグを生成。",
   },
@@ -181,7 +181,7 @@ export default function LandingPage() {
       <section className="relative z-10 px-4 py-20">
         <div className="mx-auto max-w-5xl">
           <h2 className="mb-6 text-center text-3xl font-bold uppercase tracking-tighter md:text-4xl">
-            AUTO IPTC が
+            AutoIPTC が
             <span className="relative mx-2 inline-block border-4 border-black bg-[#00E5FF] px-3 py-1 shadow-[4px_4px_0px_0px_#000]">
               すべて解決
             </span>
@@ -379,7 +379,7 @@ export default function LandingPage() {
             href="/app"
             className="group relative inline-flex items-center gap-3 border-4 border-black bg-[#FAFF00] px-10 py-5 text-xl font-bold uppercase tracking-[0.2em] text-black shadow-[8px_8px_0px_0px_#000] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_0px_#000]"
           >
-            AUTO IPTC を使ってみる →
+            AutoIPTC を使ってみる →
           </Link>
         </div>
       </section>
@@ -388,7 +388,7 @@ export default function LandingPage() {
       <footer className="relative z-10 border-t-4 border-black bg-[#F2F2F2] px-4 py-8">
         <div className="mx-auto max-w-4xl">
           <p className="text-center text-xs uppercase tracking-[0.3em] text-black/60">
-            AUTO IPTC - Powered by Gemini Flash 2.5
+            AutoIPTC - Powered by Gemini Flash 2.5
           </p>
         </div>
       </footer>
