@@ -180,7 +180,7 @@ export default function LandingPage() {
       {/* Solution Section */}
       <section className="relative z-10 px-4 py-20">
         <div className="mx-auto max-w-5xl">
-          <h2 className="mb-6 text-center text-3xl font-bold uppercase tracking-tighter md:text-4xl">
+          <h2 className="mb-6 text-center text-3xl font-bold tracking-tighter md:text-4xl">
             AutoIPTC が
             <span className="relative mx-2 inline-block border-4 border-black bg-[#00E5FF] px-3 py-1 shadow-[4px_4px_0px_0px_#000]">
               すべて解決
@@ -377,7 +377,7 @@ export default function LandingPage() {
 
           <Link
             href="/app"
-            className="group relative inline-flex items-center gap-3 border-4 border-black bg-[#FAFF00] px-10 py-5 text-xl font-bold uppercase tracking-[0.2em] text-black shadow-[8px_8px_0px_0px_#000] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_0px_#000]"
+            className="group relative inline-flex items-center gap-3 border-4 border-black bg-[#FAFF00] px-10 py-5 text-xl font-bold tracking-[0.2em] text-black shadow-[8px_8px_0px_0px_#000] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_0px_#000]"
           >
             AutoIPTC を使ってみる →
           </Link>
