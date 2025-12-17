@@ -218,7 +218,7 @@ export default function LandingPage() {
                 icon: <ImageIcon />,
                 title: "ドラッグ&ドロップ",
                 description:
-                  "最大40枚の画像を一括アップロード。JPEG、PNG、WebPに対応。",
+                  "最大50枚の画像を一括アップロード。JPEG、PNG、WebPに対応。",
               },
               {
                 icon: <SparklesIcon />,
@@ -270,7 +270,7 @@ export default function LandingPage() {
                   step: 1,
                   title: "画像をアップロード",
                   description:
-                    "ドラッグ&ドロップまたはクリックで画像を選択。最大40枚まで一括処理可能。",
+                    "ドラッグ&ドロップまたはクリックで画像を選択。最大50枚まで一括処理可能。",
                 },
                 {
                   step: 2,

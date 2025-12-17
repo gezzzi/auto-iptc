@@ -5,7 +5,7 @@ import { GoogleGenerativeAI, type Part } from "@google/generative-ai";
 type MetadataLanguage = "en" | "ja";
 
 const MODEL_NAME = "gemini-2.5-flash";
-const MAX_FILES = 40;
+const MAX_FILES = 50;
 const MAX_TAGS = 12;
 
 const SYSTEM_PROMPTS: Record<MetadataLanguage, string> = {

@@ -56,7 +56,7 @@ type UploadedFileInfo = {
   geminiFileName: string;
 };
 
-const MAX_UPLOADS = 40;
+const MAX_UPLOADS = 50;
 const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB (Vercel制限)
 const UPLOAD_CONCURRENCY = 10; // Geminiアップロード同時実行数
 const IPTC_CONCURRENCY = 5; // IPTC書き込み同時実行数
