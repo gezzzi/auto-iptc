@@ -746,9 +746,19 @@ export default function Home() {
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-12">
         <header className="relative mb-20 border-4 border-black bg-[#FF0080] p-8 text-white shadow-[8px_8px_0px_0px_#000] transition-transform duration-300 hover:rotate-0 md:rotate-1">
           <div className="flex flex-col gap-4">
-            <p className="text-4xl font-bold leading-[0.85] tracking-tighter drop-shadow-[4px_4px_0px_rgba(0,0,0,0.7)] md:text-7xl">
-              AutoIPTC
-            </p>
+            <div className="flex items-center gap-4">
+              <div className="overflow-hidden rounded-xl border-4 border-black bg-white shadow-[4px_4px_0px_0px_#000]">
+                <Image
+                  src="/android-chrome-192x192.png"
+                  alt="AutoIPTC"
+                  width={64}
+                  height={64}
+                />
+              </div>
+              <p className="text-4xl font-bold leading-[0.85] tracking-tighter drop-shadow-[4px_4px_0px_rgba(0,0,0,0.7)] md:text-7xl">
+                AutoIPTC
+              </p>
+            </div>
             <span className="w-fit -rotate-1 bg-black px-4 py-1 text-base font-bold uppercase tracking-[0.2em] text-[#FAFF00] shadow-[4px_4px_0px_rgba(255,255,255,1)] md:text-xl">
               Gemini Flash v2.5
             </span>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -23,12 +24,21 @@ export const metadata: Metadata = {
       "画像のアップロード作業がめんどくさい方へ。AIが自動でタイトル・説明・タグを生成し、IPTCとして書き込み。",
     type: "website",
     locale: "ja_JP",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "AutoIPTC - AIで画像メタデータを自動生成",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "AutoIPTC - AIで画像メタデータを自動生成",
     description:
       "画像のアップロード作業がめんどくさい方へ。AIが自動でタイトル・説明・タグを生成。",
+    images: ["/opengraph-image.png"],
   },
   robots: {
     index: true,
@@ -108,12 +118,21 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative z-10 px-4 pb-20 pt-16 md:pt-24">
         <div className="mx-auto max-w-5xl">
-          {/* Badge */}
+          {/* Logo */}
           <div className="mb-8 flex justify-center">
-            <span className="inline-flex items-center gap-2 border-4 border-black bg-black px-4 py-2 text-sm font-bold uppercase tracking-[0.2em] text-[#FAFF00] shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)]">
-              <ZapIcon />
-              Gemini AI 搭載
-            </span>
+            <div className="flex items-center gap-4">
+              <div className="overflow-hidden rounded-lg border-2 border-black bg-white shadow-[3px_3px_0px_0px_#000]">
+                <Image
+                  src="/android-chrome-192x192.png"
+                  alt="AutoIPTC"
+                  width={48}
+                  height={48}
+                />
+              </div>
+              <span className="inline-block border-4 border-black bg-[#FF0080] px-4 py-2 text-xl font-bold text-white shadow-[8px_8px_0px_0px_#000]">
+                AutoIPTC
+              </span>
+            </div>
           </div>
 
           {/* Main heading - SEO H1 */}
@@ -386,7 +405,15 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="relative z-10 border-t-4 border-black bg-[#F2F2F2] px-4 py-8">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-4">
+          <div className="overflow-hidden rounded-lg border-2 border-black/30 bg-white">
+            <Image
+              src="/android-chrome-192x192.png"
+              alt="AutoIPTC"
+              width={40}
+              height={40}
+            />
+          </div>
           <p className="text-center text-xs uppercase tracking-[0.3em] text-black/60">
             AutoIPTC - Powered by Gemini Flash 2.5
           </p>
