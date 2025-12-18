@@ -319,7 +319,7 @@ export default function Home() {
   );
 
   const handleGenerateMetadata = useCallback(
-    async (targets?: UploadedImage[]) => {
+    async (targets?: UploadedImage[]): Promise<UploadedImage[] | null> => {
       const targetList = (targets && targets.length > 0 ? targets : uploads).slice(
         0,
         MAX_UPLOADS,
@@ -327,7 +327,7 @@ export default function Home() {
 
       if (targetList.length === 0) {
         setErrorMessage("まず画像をアップロードしてください。");
-        return;
+        return null;
       }
 
       const targetIds = new Set(targetList.map((item) => item.id));
@@ -482,37 +482,42 @@ export default function Home() {
         // アップロード失敗分も missing に追加
         failedIds.forEach((id) => missing.add(id));
 
-        setUploads((prev) =>
-          prev.map((item) => {
-            if (!targetIds.has(item.id)) return item;
-            
-            if (failedIds.has(item.id)) {
-              return { ...item, metadataStatus: "error" as Status };
-            }
+        // 更新後のデータを計算（targetListを基に）
+        const updateItem = (item: UploadedImage): UploadedImage => {
+          if (!targetIds.has(item.id)) return item;
+          
+          if (failedIds.has(item.id)) {
+            return { ...item, metadataStatus: "error" as Status };
+          }
 
-            const match = allResults.get(item.id);
-            if (!match) {
-              return { ...item, metadataStatus: "error" as Status };
-            }
+          const match = allResults.get(item.id);
+          if (!match) {
+            return { ...item, metadataStatus: "error" as Status };
+          }
 
-            const tagsText = Array.isArray(match.tags)
-              ? match.tags
-                  .map((tag) => trimText(tag))
-                  .filter((tag) => tag.length > 0)
-                  .join(", ")
-              : trimText(match.tags);
+          const tagsText = Array.isArray(match.tags)
+            ? match.tags
+                .map((tag) => trimText(tag))
+                .filter((tag) => tag.length > 0)
+                .join(", ")
+            : trimText(match.tags);
 
-            return {
-              ...item,
-              title: trimText(match.title) || item.title,
-              description: trimText(match.description) || item.description,
-              tags: tagsText || item.tags,
-              metadataStatus: "success" as Status,
-              iptcStatus: "idle" as Status,
-              iptcMessage: undefined,
-            };
-          }),
-        );
+          return {
+            ...item,
+            title: trimText(match.title) || item.title,
+            description: trimText(match.description) || item.description,
+            tags: tagsText || item.tags,
+            metadataStatus: "success" as Status,
+            iptcStatus: "idle" as Status,
+            iptcMessage: undefined,
+          };
+        };
+
+        // targetListを更新して返り値用に保持
+        const updatedTargetList = targetList.map(updateItem);
+
+        // state も更新
+        setUploads((prev) => prev.map(updateItem));
 
         if (missing.size > 0) {
           setMetadataMessage({
@@ -525,6 +530,9 @@ export default function Home() {
             text: `${allResults.size} 件のメタデータを反映しました。`,
           });
         }
+
+        setIsGenerating(false);
+        return updatedTargetList;
       } catch (error) {
         const message =
           error instanceof Error && error.message
@@ -539,8 +547,8 @@ export default function Home() {
               : item,
           ),
         );
-      } finally {
         setIsGenerating(false);
+        return null;
       }
     },
     [language, uploads],
@@ -641,8 +649,10 @@ export default function Home() {
     [writeIptc],
   );
 
-  const handleWriteAll = useCallback(async () => {
-    if (!uploads.length) {
+  const handleWriteAll = useCallback(async (targets?: UploadedImage[]) => {
+    const targetList = targets && targets.length > 0 ? targets : uploads;
+    
+    if (!targetList.length) {
       setErrorMessage("まず画像をアップロードしてください。");
       return;
     }
@@ -657,7 +667,7 @@ export default function Home() {
       let completedCount = 0;
 
       // 並列処理用のキュー
-      const queue = [...uploads];
+      const queue = [...targetList];
       
       const worker = async () => {
         while (queue.length > 0) {
@@ -672,14 +682,14 @@ export default function Home() {
           completedCount++;
           setMetadataMessage({
             type: "success",
-            text: `IPTC書き込み中... (${completedCount}/${uploads.length})`,
+            text: `IPTC書き込み中... (${completedCount}/${targetList.length})`,
           });
         }
       };
 
       // 並列でワーカーを実行
       await Promise.all(
-        Array.from({ length: Math.min(IPTC_CONCURRENCY, uploads.length) }, worker)
+        Array.from({ length: Math.min(IPTC_CONCURRENCY, targetList.length) }, worker)
       );
 
       if (results.length === 0) {
@@ -704,8 +714,8 @@ export default function Home() {
       });
       downloadBlob(content, `iptc_download_${formatTimestampForFile(Date.now())}.zip`);
 
-      if (results.length < uploads.length) {
-        const failedCount = uploads.length - results.length;
+      if (results.length < targetList.length) {
+        const failedCount = targetList.length - results.length;
         setErrorMessage(
           `${failedCount} 件で IPTC 書き込みに失敗しました。成功分のみ ZIP に含まれています。`,
         );
@@ -732,10 +742,15 @@ export default function Home() {
     }
 
     // ステップ2: メタデータ生成
-    await handleGenerateMetadata();
+    const updatedUploads = await handleGenerateMetadata();
 
-    // ステップ3: IPTC書き込み＆ZIP DL
-    await handleWriteAll();
+    // メタデータ生成に失敗した場合は中断
+    if (!updatedUploads) {
+      return;
+    }
+
+    // ステップ3: IPTC書き込み＆ZIP DL（更新後のデータを渡す）
+    await handleWriteAll(updatedUploads);
   }, [uploads.length, handleGenerateMetadata, handleWriteAll]);
 
   return (
@@ -990,7 +1005,7 @@ export default function Home() {
                   </div>
                   <button
                     type="button"
-                    onClick={handleWriteAll}
+                    onClick={() => handleWriteAll()}
                     disabled={!uploads.length || isWritingAll}
                     className={`w-full flex items-center justify-center gap-2 border-4 border-black px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] transition hover:-translate-y-1 hover:-translate-x-1 hover:bg-[#FAFF00] disabled:cursor-not-allowed disabled:opacity-50 ${
                       stepInfo.currentStep === 2 ? "bg-[#FAFF00]/40" : "bg-white"
