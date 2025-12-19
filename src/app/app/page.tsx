@@ -783,7 +783,10 @@ export default function Home() {
             </p>
             <button
               type="button"
-              onClick={() => setShowVideoModal(true)}
+              onClick={() => {
+                window.dataLayer?.push({ event: "youtube_btn_click" });
+                setShowVideoModal(true);
+              }}
               className="mt-4 inline-flex w-fit items-center gap-2 border-4 border-black bg-[#FAFF00] px-5 py-3 text-base font-bold uppercase tracking-wider text-black shadow-[4px_4px_0px_0px_#000] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000]"
             >
               <svg className="h-6 w-6 text-red-600" viewBox="0 0 24 24" fill="currentColor">
