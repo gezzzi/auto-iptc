@@ -5,6 +5,7 @@ import path from "path";
 import matter from "gray-matter";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Footer from "@/components/Footer";
 
 interface BlogPostProps {
   params: Promise<{ slug: string }>;
@@ -420,14 +421,7 @@ export default async function BlogPostPage({ params }: BlogPostProps) {
         </section>
       </div>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t-4 border-black bg-[#F2F2F2] px-4 py-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-black/60">
-            AutoIPTC - Powered by Gemini Flash 2.5
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

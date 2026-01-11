@@ -3,6 +3,7 @@ import Link from "next/link";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "ブログ | AutoIPTC - ストックフォト＆画像メタデータのお役立ち情報",
@@ -139,20 +140,7 @@ export default function BlogPage() {
         </section>
       </div>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t-4 border-black bg-[#F2F2F2] px-4 py-8">
-        <div className="mx-auto max-w-5xl text-center">
-          <Link
-            href="/app"
-            className="inline-flex items-center gap-3 border-4 border-black bg-[#FAFF00] px-8 py-4 text-lg font-bold uppercase tracking-[0.2em] shadow-[6px_6px_0px_0px_#000] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#000]"
-          >
-            AutoIPTC を使ってみる →
-          </Link>
-          <p className="mt-8 text-xs uppercase tracking-[0.3em] text-black/60">
-            AutoIPTC - Powered by Gemini Flash 2.5
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

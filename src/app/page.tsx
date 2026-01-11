@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "AutoIPTC - AIで画像メタデータを自動生成 | IPTC自動書き込みツール",
@@ -403,22 +404,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t-4 border-black bg-[#F2F2F2] px-4 py-8">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-4">
-          <div className="overflow-hidden rounded-lg border-2 border-black/30 bg-white">
-            <Image
-              src="/android-chrome-192x192.png"
-              alt="AutoIPTC"
-              width={40}
-              height={40}
-            />
-          </div>
-          <p className="text-center text-xs uppercase tracking-[0.3em] text-black/60">
-            AutoIPTC - Powered by Gemini Flash 2.5
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

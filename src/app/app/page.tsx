@@ -2,6 +2,7 @@
 
 import JSZip from "jszip";
 import Image from "next/image";
+import Footer from "@/components/Footer";
 import {
   useCallback,
   useMemo,
@@ -1218,6 +1219,8 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <Footer />
     </main>
   );
 }
