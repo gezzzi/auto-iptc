@@ -62,17 +62,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <head>
+      <body
+        className={`${spaceMono.variable} ${notoSansJp.variable} antialiased`}
+      >
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5710738744843996"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
-      </head>
-      <body
-        className={`${spaceMono.variable} ${notoSansJp.variable} antialiased`}
-      >
         {children}
       </body>
     </html>
