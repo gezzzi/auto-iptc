@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -116,6 +117,8 @@ export default function LandingPage() {
         className="pointer-events-none fixed inset-0 z-0 bg-cross opacity-35"
       />
 
+      <Header />
+
       {/* Hero Section */}
       <section className="relative z-10 px-4 pb-20 pt-16 md:pt-24">
         <div className="mx-auto max-w-5xl">
@@ -164,7 +167,7 @@ export default function LandingPage() {
       </section>
 
       {/* Problem Section */}
-      <section className="relative z-10 bg-[#F2F2F2] px-4 py-20 text-black">
+      <section className="relative z-10 bg-[#FFF9F0] px-4 py-20 text-black">
         <div className="mx-auto max-w-4xl">
           <h2 className="mb-12 text-center text-3xl font-bold uppercase tracking-tighter md:text-4xl">
             <span className="border-b-4 border-[#FF0080] pb-2">
@@ -256,7 +259,7 @@ export default function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section className="relative z-10 bg-[#F2F2F2] px-4 py-20">
+      <section className="relative z-10 bg-[#FFF9F0] px-4 py-20">
         <div className="mx-auto max-w-4xl">
           <h2 className="mb-16 text-center text-3xl font-bold uppercase tracking-tighter md:text-4xl">
             <span className="border-4 border-black bg-[#FAFF00] px-4 py-2 shadow-[4px_4px_0px_0px_#000]">
@@ -341,7 +344,7 @@ export default function LandingPage() {
       </section>
 
       {/* Use cases */}
-      <section className="relative z-10 bg-[#F2F2F2] px-4 py-20 text-black">
+      <section className="relative z-10 bg-[#FFF9F0] px-4 py-20 text-black">
         <div className="mx-auto max-w-4xl">
           <h2 className="mb-12 text-center text-3xl font-bold uppercase tracking-tighter md:text-4xl">
             こんな方におすすめ

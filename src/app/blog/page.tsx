@@ -3,6 +3,7 @@ import Link from "next/link";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -65,16 +66,12 @@ export default function BlogPage() {
         className="pointer-events-none fixed inset-0 z-0 bg-cross opacity-35"
       />
 
+      <Header />
+
       <div className="relative z-10">
-        {/* Header */}
-        <header className="border-b-4 border-black bg-white px-4 py-6">
+        {/* Page Title */}
+        <section className="px-4 py-12">
           <div className="mx-auto max-w-5xl">
-            <Link
-              href="/"
-              className="mb-4 inline-flex items-center gap-2 text-sm uppercase tracking-[0.2em] hover:text-[#FF0080]"
-            >
-              ← ホームに戻る
-            </Link>
             <h1 className="mb-2 text-4xl font-bold uppercase tracking-tighter md:text-5xl">
               <span className="inline-block border-4 border-black bg-[#FF0080] px-4 py-2 text-white shadow-[6px_6px_0px_0px_#000]">
                 Blog
@@ -84,7 +81,7 @@ export default function BlogPage() {
               ストックフォト＆画像メタデータのお役立ち情報
             </p>
           </div>
-        </header>
+        </section>
 
         {/* Blog posts */}
         <section className="px-4 py-12">

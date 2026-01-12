@@ -5,9 +5,9 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative z-10 border-t-4 border-black bg-[#F2F2F2]">
+    <footer className="relative z-10 border-t-4 border-black bg-[#FFF9F0]">
       <div className="mx-auto max-w-6xl px-4 py-12">
-        <div className="grid gap-8 md:grid-cols-4">
+        <div className="grid gap-8 md:grid-cols-3">
           {/* About */}
           <div>
             <div className="mb-4 flex items-center gap-3">
@@ -101,43 +101,13 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-
-          {/* Tech */}
-          <div>
-            <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.15em]">
-              Technology
-            </h3>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2">
-                <span className="h-2 w-2 bg-[#00E5FF]"></span>
-                <span className="text-xs uppercase tracking-[0.1em] text-black/70">
-                  Next.js 16
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-2 w-2 bg-[#FAFF00]"></span>
-                <span className="text-xs uppercase tracking-[0.1em] text-black/70">
-                  Google Gemini Flash 2.5
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-2 w-2 bg-[#FF0080]"></span>
-                <span className="text-xs uppercase tracking-[0.1em] text-black/70">
-                  TypeScript
-                </span>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* Bottom bar */}
         <div className="mt-8 border-t-2 border-black pt-8">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
             <p className="text-xs uppercase tracking-[0.15em] text-black/60">
               © {currentYear} AutoIPTC. All rights reserved.
-            </p>
-            <p className="text-xs uppercase tracking-[0.15em] text-black/60">
-              Powered by Gemini Flash 2.5
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import JSZip from "jszip";
 import Image from "next/image";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import {
   useCallback,
@@ -755,11 +756,12 @@ export default function Home() {
   }, [uploads.length, handleGenerateMetadata, handleWriteAll]);
 
   return (
-    <main className="relative min-h-screen bg-[#FFDEE9] pb-24 font-[var(--font-space-mono)] text-black">
+    <main className="relative min-h-screen bg-[#FFDEE9] font-[var(--font-space-mono)] text-black">
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-0 bg-cross opacity-35"
       />
+      <Header />
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-12">
         <header className="relative mb-20 border-4 border-black bg-[#FF0080] p-8 text-white shadow-[8px_8px_0px_0px_#000] transition-transform duration-300 hover:rotate-0 md:rotate-1">
           <div className="flex flex-col gap-4">
@@ -815,7 +817,7 @@ export default function Home() {
             <div className="relative mb-16 flex items-center justify-center">
               <div className="relative flex w-full max-w-3xl items-center justify-between">
                 {/* Background connector line */}
-                <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 border-4 border-black bg-[#F2F2F2]" />
+                <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 border-4 border-black bg-[#FFF9F0]" />
 
                 {steps.map((step, index) => {
                   const isActive = currentStep >= step.number - 1;
@@ -915,7 +917,7 @@ export default function Home() {
                   className={`relative flex min-h-44 cursor-pointer flex-col items-center justify-center border-4 border-dashed border-black px-6 py-6 text-center text-sm uppercase tracking-[0.2em] transition hover:-translate-y-1 hover:-translate-x-1 ${
                     stepInfo.currentStep === 0
                       ? "bg-[#FAFF00]/40 hover:bg-[#FAFF00]/70"
-                      : "bg-[#F2F2F2] hover:bg-[#FAFF00]/70"
+                      : "bg-[#FFF9F0] hover:bg-[#FAFF00]/70"
                   }`}
                 >
                   <div className={`absolute -left-3 -top-3 z-10 flex h-8 w-8 items-center justify-center border-4 border-black text-sm font-bold shadow-[2px_2px_0px_0px_#000] ${
@@ -979,7 +981,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="relative grid gap-3 rounded-lg border-4 border-black bg-[#F2F2F2] p-4 shadow-[6px_6px_0px_0px_#000]">
+              <div className="relative grid gap-3 rounded-lg border-4 border-black bg-[#FFF9F0] p-4 shadow-[6px_6px_0px_0px_#000]">
                 <p className="text-sm font-bold uppercase tracking-[0.2em]">
                   アクション
                 </p>
@@ -1112,7 +1114,7 @@ export default function Home() {
                         <span>{formatBytes(upload.size)}</span>
                         <span>{upload.type || "image"}</span>
                       </div>
-                      <div className="mt-4 grid gap-3 rounded border-2 border-black bg-[#F2F2F2] p-3 shadow-[4px_4px_0px_0px_#000]">
+                      <div className="mt-4 grid gap-3 rounded border-2 border-black bg-[#FFF9F0] p-3 shadow-[4px_4px_0px_0px_#000]">
                         <label className="flex flex-col gap-1 text-xs font-bold uppercase tracking-[0.2em] text-black">
                           <span>タイトル</span>
                           <input

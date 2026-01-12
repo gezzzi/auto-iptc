@@ -5,6 +5,7 @@ import path from "path";
 import matter from "gray-matter";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 interface BlogPostProps {
@@ -140,6 +141,7 @@ export default async function BlogPostPage({ params }: BlogPostProps) {
           aria-hidden="true"
           className="pointer-events-none fixed inset-0 z-0 bg-cross opacity-35"
         />
+        <Header />
         <div className="relative z-10 flex min-h-screen items-center justify-center px-4">
           <div className="border-4 border-black bg-white p-8 text-center shadow-[8px_8px_0px_0px_#000]">
             <h1 className="mb-4 text-2xl font-bold uppercase tracking-tighter">
@@ -161,7 +163,7 @@ export default async function BlogPostPage({ params }: BlogPostProps) {
 
   // Component to render TOC
   const TableOfContents = () => (
-    <nav className="my-8 border-4 border-black bg-[#F2F2F2] p-6">
+    <nav className="my-8 border-4 border-black bg-[#FFF9F0] p-6">
       <h2 className="mb-4 text-xl font-bold uppercase tracking-tight">
         目次
       </h2>
@@ -202,9 +204,11 @@ export default async function BlogPostPage({ params }: BlogPostProps) {
         className="pointer-events-none fixed inset-0 z-0 bg-cross opacity-35"
       />
 
+      <Header />
+
       <div className="relative z-10">
-        {/* Header */}
-        <header className="border-b-4 border-black bg-white px-4 py-6">
+        {/* Article Header */}
+        <section className="px-4 py-12">
           <div className="mx-auto max-w-4xl">
             <Link
               href="/blog"
@@ -236,7 +240,7 @@ export default async function BlogPostPage({ params }: BlogPostProps) {
               })}
             </time>
           </div>
-        </header>
+        </section>
 
         {/* Article content */}
         <article className="px-4 py-12">
@@ -328,7 +332,7 @@ export default async function BlogPostPage({ params }: BlogPostProps) {
                     ),
                     blockquote: ({ ...props }) => (
                       <blockquote
-                        className="my-4 border-l-4 border-[#FF0080] bg-[#F2F2F2] p-4 italic"
+                        className="my-4 border-l-4 border-[#FF0080] bg-[#FFF9F0] p-4 italic"
                         {...props}
                       />
                     ),
@@ -343,7 +347,7 @@ export default async function BlogPostPage({ params }: BlogPostProps) {
                         </code>
                       ) : (
                         <code
-                          className="block overflow-x-auto rounded border-2 border-black bg-[#F2F2F2] p-4 font-mono text-sm"
+                          className="block overflow-x-auto rounded border-2 border-black bg-[#FFF9F0] p-4 font-mono text-sm"
                           {...props}
                         >
                           {children}
