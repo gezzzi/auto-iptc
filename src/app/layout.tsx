@@ -3,8 +3,6 @@ import { Noto_Sans_JP, Space_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
-const GTM_ID = "GTM-KXZNPGF4";
-
 const spaceMono = Space_Mono({
   variable: "--font-space-mono",
   subsets: ["latin"],
@@ -66,30 +64,15 @@ export default function RootLayout({
     <html lang="ja">
       <head>
         <Script
-          id="gtm-script"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5710738744843996"
+          crossOrigin="anonymous"
           strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','${GTM_ID}');
-            `,
-          }}
         />
       </head>
       <body
         className={`${spaceMono.variable} ${notoSansJp.variable} antialiased`}
       >
-        <noscript>
-          <iframe
-            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
         {children}
       </body>
     </html>
