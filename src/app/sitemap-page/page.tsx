@@ -112,6 +112,42 @@ export default function SitemapPage() {
                   </li>
                   <li>
                     <Link
+                      href="/about"
+                      className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.1em] text-[#FF0080] hover:underline"
+                    >
+                      <span className="h-2 w-2 bg-[#FF0080]"></span>
+                      運営者情報
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/contact"
+                      className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.1em] text-[#FF0080] hover:underline"
+                    >
+                      <span className="h-2 w-2 bg-[#FF0080]"></span>
+                      お問い合わせ
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/privacy"
+                      className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.1em] text-[#FF0080] hover:underline"
+                    >
+                      <span className="h-2 w-2 bg-[#FF0080]"></span>
+                      プライバシーポリシー
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/terms"
+                      className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.1em] text-[#FF0080] hover:underline"
+                    >
+                      <span className="h-2 w-2 bg-[#FF0080]"></span>
+                      利用規約
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
                       href="/sitemap-page"
                       className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.1em] text-[#FF0080] hover:underline"
                     >

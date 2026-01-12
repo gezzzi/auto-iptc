@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className="relative z-10 border-t-4 border-black bg-[#FFF9F0]">
       <div className="mx-auto max-w-6xl px-4 py-12">
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* About */}
           <div>
             <div className="mb-4 flex items-center gap-3">
@@ -60,10 +60,10 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/sitemap-page"
+                  href="/about"
                   className="text-xs uppercase tracking-[0.1em] text-black/70 hover:text-[#FF0080]"
                 >
-                  サイトマップ
+                  運営者情報
                 </Link>
               </li>
             </ul>
@@ -97,6 +97,47 @@ export default function Footer() {
                   className="text-xs uppercase tracking-[0.1em] text-black/70 hover:text-[#FF0080]"
                 >
                   タグ付けのコツ
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.15em]">
+              Legal
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-xs uppercase tracking-[0.1em] text-black/70 hover:text-[#FF0080]"
+                >
+                  プライバシーポリシー
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-xs uppercase tracking-[0.1em] text-black/70 hover:text-[#FF0080]"
+                >
+                  利用規約
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-xs uppercase tracking-[0.1em] text-black/70 hover:text-[#FF0080]"
+                >
+                  お問い合わせ
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/sitemap-page"
+                  className="text-xs uppercase tracking-[0.1em] text-black/70 hover:text-[#FF0080]"
+                >
+                  サイトマップ
                 </Link>
               </li>
             </ul>
