@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -178,6 +179,20 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isWritingAll, setIsWritingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // LocalStorageから言語設定を読み込む
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem("autoiptc-language");
+    if (savedLanguage === "en" || savedLanguage === "ja") {
+      setLanguage(savedLanguage);
+    }
+  }, []);
+
+  // 言語を変更してlocalStorageに保存
+  const changeLanguage = useCallback((newLanguage: MetadataLanguage) => {
+    setLanguage(newLanguage);
+    localStorage.setItem("autoiptc-language", newLanguage);
+  }, []);
 
   const totalSize = useMemo(
     () => uploads.reduce((sum, item) => sum + item.size, 0),
@@ -952,7 +967,7 @@ export default function Home() {
                       <button
                         type="button"
                         aria-pressed={language === "en"}
-                        onClick={() => setLanguage("en")}
+                        onClick={() => changeLanguage("en")}
                         className={`border-2 border-black px-3 py-1 transition ${
                           language === "en"
                             ? "bg-[#FAFF00]"
@@ -964,7 +979,7 @@ export default function Home() {
                       <button
                         type="button"
                         aria-pressed={language === "ja"}
-                        onClick={() => setLanguage("ja")}
+                        onClick={() => changeLanguage("ja")}
                         className={`border-2 border-black px-3 py-1 transition ${
                           language === "ja"
                             ? "bg-[#FAFF00]"
