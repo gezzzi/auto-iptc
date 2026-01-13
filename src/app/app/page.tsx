@@ -779,10 +779,10 @@ export default function Home() {
               </p>
             </div>
             <span className="w-fit -rotate-1 bg-black px-4 py-1 text-base font-bold uppercase tracking-[0.2em] text-[#FAFF00] shadow-[4px_4px_0px_rgba(255,255,255,1)] md:text-xl">
-              Gemini Flash v2.5
+              AI自動メタデータ生成
             </span>
             <p className="max-w-3xl text-sm uppercase tracking-[0.3em] text-slate-100">
-              アップロード画像に対して Gemini でタイトル・説明・タグを生成し、IPTC として書き込みできます
+              アップロード画像に対して Gemini でタイトル・説明・タグを生成し、IPTC として書き込みできます　※PC環境での使用を推奨
             </p>
             <button
               type="button"
