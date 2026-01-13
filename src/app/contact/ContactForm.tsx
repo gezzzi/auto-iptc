@@ -11,23 +11,39 @@ export default function ContactForm() {
     subject: "",
     message: "",
   });
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setStatus("loading");
 
-    // メールリンクを生成
-    const mailtoLink = `mailto:contact@autoiptc.com?subject=${encodeURIComponent(
-      formData.subject
-    )}&body=${encodeURIComponent(
-      `お名前: ${formData.name}\nメールアドレス: ${formData.email}\n\nお問い合わせ内容:\n${formData.message}`
-    )}`;
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY,
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
 
-    // メールクライアントを開く
-    window.location.href = mailtoLink;
+      const result = await response.json();
 
-    setStatus("success");
-    setFormData({ name: "", email: "", subject: "", message: "" });
+      if (result.success) {
+        setStatus("success");
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setStatus("error");
+    }
   };
 
   const handleChange = (
@@ -148,21 +164,22 @@ export default function ContactForm() {
 
                 {status === "success" && (
                   <div className="border-4 border-black bg-[#00E5FF] p-4 text-sm font-bold uppercase tracking-[0.15em]">
-                    メールクライアントが起動します。送信を完了してください。
+                    お問い合わせを送信しました。ご連絡ありがとうございます。
                   </div>
                 )}
 
                 {status === "error" && (
                   <div className="border-4 border-black bg-red-500 p-4 text-sm font-bold uppercase tracking-[0.15em] text-white">
-                    エラーが発生しました。もう一度お試しください。
+                    送信に失敗しました。もう一度お試しください。
                   </div>
                 )}
 
                 <button
                   type="submit"
-                  className="w-full border-4 border-black bg-[#FAFF00] px-8 py-4 text-lg font-bold uppercase tracking-[0.2em] shadow-[6px_6px_0px_0px_#000] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#000]"
+                  disabled={status === "loading"}
+                  className="w-full border-4 border-black bg-[#FAFF00] px-8 py-4 text-lg font-bold uppercase tracking-[0.2em] shadow-[6px_6px_0px_0px_#000] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#000] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0px_0px_#000]"
                 >
-                  送信する →
+                  {status === "loading" ? "送信中..." : "送信する →"}
                 </button>
 
                 <p className="text-xs uppercase tracking-[0.15em] text-black/60">
