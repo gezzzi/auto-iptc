@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { GoogleGenerativeAI, type Part } from "@google/generative-ai";
+import { recordMetric } from "@/lib/site-admin";
 
 type MetadataLanguage = "en" | "ja";
 
@@ -169,6 +170,16 @@ export async function POST(request: NextRequest) {
       geminiFileName: typeof entry.geminiFileName === "string" ? entry.geminiFileName : "",
     });
   }
+
+  // Count this AI feature usage as one event regardless of image_count.
+  // Fire-and-forget; failures are swallowed inside recordMetric.
+  void recordMetric("ai_generate", {
+    dimensions: {
+      language,
+      image_count: files.length,
+      source: "autoiptc.com",
+    },
+  });
 
   const fileManager = new GoogleAIFileManager(apiKey);
   const generativeAI = new GoogleGenerativeAI(apiKey);

@@ -18,23 +18,17 @@ export default function ContactForm() {
     setStatus("loading");
 
     try {
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY,
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
-        }),
+        body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+      const result = await response.json().catch(() => ({ success: false }));
 
-      if (result.success) {
+      if (response.ok && result.success) {
         setStatus("success");
         setFormData({ name: "", email: "", subject: "", message: "" });
       } else {
