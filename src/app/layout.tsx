@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Noto_Sans_JP, Space_Mono } from "next/font/google";
 import Script from "next/script";
+import SiteAdminAnalytics from "@/components/SiteAdminAnalytics";
 import "./globals.css";
 
 const spaceMono = Space_Mono({
@@ -74,6 +76,9 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
         {children}
+        <Suspense fallback={null}>
+          <SiteAdminAnalytics />
+        </Suspense>
       </body>
     </html>
   );
